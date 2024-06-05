@@ -26,6 +26,7 @@ FINCH_OS_AARCH64_DIGEST := $(or $(FINCH_OS_AARCH64_DIGEST),"sha256:16268745d1f40
 FINCH_ROOTFS_x86_URL := $(or $(FINCH_ROOTFS_x86_URL),https://deps.runfinch.com/common/x86-64/finch-rootfs-production-amd64-1715724303.tar.gz)
 FINCH_ROOTFS_x86_DIGEST := $(or $(FINCH_ROOTFS_x86_DIGEST),"sha256:8bf3e620782ac8991102120b80c0d1be259cd880451c900dd7e8bd284c86f171")
 
+DEPENDENCIES_BASE_URL := https://deps.runfinch.com
 LIMA_DEPENDENCY_FILE_NAME ?= lima-and-qemu.tar.gz
 .DEFAULT_GOAL := all
 
@@ -36,7 +37,8 @@ WINGIT_x86_HASH := $(or $(WINGIT_x86_HASH),"sha256:c192e56f8ed3d364acc87ad04d1f5
 
 ifneq (,$(findstring arm64,$(ARCH)))
 	LIMA_ARCH = aarch64
-	LIMA_URL ?= https://deps.runfinch.com/aarch64/lima-and-qemu.macos-aarch64.1715099032.tar.gz
+	LIMA_DEPENDENCY_ARCH_FILE_NAME ?= lima-and-qemu.macos-aarch64.1715099032.tar.gz
+	LIMA_URL ?= $(DEPENDENCIES_BASE_URL)/$(LIMA_ARCH)/$(LIMA_DEPENDENCY_ARCH_FILE_NAME)
 	FINCH_OS_BASENAME := $(notdir $(FINCH_OS_AARCH64_URL))
 	FINCH_OS_IMAGE_URL := $(FINCH_OS_AARCH64_URL)
 	FINCH_OS_DIGEST ?= $(FINCH_OS_AARCH64_DIGEST)
@@ -48,7 +50,8 @@ ifneq (,$(findstring arm64,$(ARCH)))
 
 else ifneq (,$(findstring x86_64,$(ARCH)))
 	LIMA_ARCH = x86_64
-	LIMA_URL ?= https://deps.runfinch.com/x86-64/lima-and-qemu.macos-x86_64.1715099032.tar.gz
+	LIMA_DEPENDENCY_ARCH_FILE_NAME ?= lima-and-qemu.macos-x86_64.1715099032.tar.gz
+	LIMA_URL ?= $(DEPENDENCIES_BASE_URL)/x86-64/$(LIMA_DEPENDENCY_ARCH_FILE_NAME)
 	FINCH_OS_BASENAME := $(notdir $(FINCH_OS_x86_URL))
 	FINCH_OS_IMAGE_URL := $(FINCH_OS_x86_URL)
 	FINCH_OS_DIGEST ?= $(FINCH_OS_x86_DIGEST)
@@ -98,9 +101,9 @@ $(OS_DOWNLOAD_DIR)/$(FINCH_OS_BASENAME):
 $(ROOTFS_DOWNLOAD_DIR)/$(FINCH_ROOTFS_BASENAME):
 	mkdir -p $(ROOTFS_DOWNLOAD_DIR)
 	mkdir -p $(OUTDIR)/os
-	curl -L --fail $(FINCH_ROOTFS_URL) > "$(ROOTFS_DOWNLOAD_DIR)/$(FINCH_ROOTFS_BASENAME)"
-	cp $(ROOTFS_DOWNLOAD_DIR)/$(FINCH_ROOTFS_BASENAME) $(OUTDIR)/os
-
+	curl -L --fail $(FINCH_ROOTFS_URL) > $@
+	cd $(ROOTFS_DOWNLOAD_DIR) && shasum --algorithm 512 --check $(HASH_DIR)/$(FINCH_ROOTFS_BASENAME).sha512sum || \
+		(echo "error: shasum verification failed for rootfs" && exit 1)
 
 .PHONY: download.os
 download.os: $(OS_DOWNLOAD_DIR)/$(FINCH_OS_BASENAME)
@@ -112,6 +115,13 @@ download.rootfs: $(ROOTFS_DOWNLOAD_DIR)/$(FINCH_ROOTFS_BASENAME)
 $(LIMA_DOWNLOAD_DIR)/$(LIMA_DEPENDENCY_FILE_NAME):
 	mkdir -p $(DEPENDENCIES_DOWNLOAD_DIR)
 	curl -L --fail $(LIMA_URL) > "$(DEPENDENCIES_DOWNLOAD_DIR)/$(LIMA_DEPENDENCY_FILE_NAME)"
+
+	# validate shasum for lima artifact
+	(shasum --algorithm 512 "$(DEPENDENCIES_DOWNLOAD_DIR)/$(LIMA_DEPENDENCY_FILE_NAME)" | \
+		cut -d ' ' -f 1 | \
+		grep -xq "^$$(cat $(HASH_DIR)/$(LIMA_DEPENDENCY_ARCH_FILE_NAME).sha512sum)$$") || \
+		(echo "error: shasum verification failed for lima dependency" && exit 1)
+
 	mkdir -p ${OUTDIR}
 	tar -xvzf ${DEPENDENCIES_DOWNLOAD_DIR}/${LIMA_DEPENDENCY_FILE_NAME} -C ${OUTDIR}
 

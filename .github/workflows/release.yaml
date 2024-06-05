@@ -49,6 +49,12 @@ jobs:
           brew upgrade
           sudo cpanm install JSON
           curl -OL https://bitbucket.org/objective-see/deploy/downloads/FileMonitor_1.3.0.zip
+
+          # validate shasum for FileMonitor dependency
+          (echo "17a1335e76fb9298ed4e33fd7d7fc8e2f96c1b849db86fb250caf58f1689d2b2bf09eb5cc8cd10ac95f9b8bf38c90b8b99899505b3f3816cdfd14038011c000e FileMonitor_1.3.0.zip" | \
+            shasum --algorithm 512 --status --check) || \
+            (echo "error: failed shasum verification for FileMonitor dependency" && exit 1)
+
           rm -rf /Applications/FileMonitor.app
           unzip FileMonitor_1.3.0.zip -d /Applications
         shell: zsh {0}
@@ -110,6 +116,9 @@ jobs:
           brew upgrade
           sudo cpanm install JSON
           curl -OL https://bitbucket.org/objective-see/deploy/downloads/FileMonitor_1.3.0.zip
+          (echo "17a1335e76fb9298ed4e33fd7d7fc8e2f96c1b849db86fb250caf58f1689d2b2bf09eb5cc8cd10ac95f9b8bf38c90b8b99899505b3f3816cdfd14038011c000e FileMonitor_1.3.0.zip" | \
+            shasum --algorithm 512 --status --check) || \
+            (echo "error: failed shasum verification for FileMonitor dependency" && exit 1)
           rm -rf /Applications/FileMonitor.app
           unzip FileMonitor_1.3.0.zip -d /Applications
         shell: zsh {0}
