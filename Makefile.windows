@@ -31,8 +31,7 @@ install.lima: lima-exe install.lima-dependencies-wsl2
 
 .PHONY: lima-exe
 lima-exe: $(LIMA_OUTDIR)
-	cd src/lima && \
-	"$(MAKE)" exe _output/share/lima/lima-guestagent.Linux-x86_64
+	$(MAKE) -C src/lima exe _output/share/lima/lima-guestagent.Linux-x86_64
 	cp -r src/lima/_output/* $(LIMA_OUTDIR)
 
 .PHONY: install.lima-dependencies-wsl2
