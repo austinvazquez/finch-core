@@ -69,17 +69,18 @@ case "${arch}" in
 esac
 
 # pull artifact from dependency repository
-curl -L --fail "${url}/${artifact}" > "${file}"
+curl -L --fail --output "${file}" "${url}/${artifact}"
 
-shasum=""
-if sha512sum; then
-  shasum="sha512sum"
-elif shasum -a 512; then
-  shasum="shasum -a 512"
+shasum_cmd=()
+if hash sha512sum; then
+  shasum_cmd=(sha512sum)
+elif hash shasum; then
+  shasum_cmd=(shasum -a 512)
 else
   echo "error: shasum dependency not found" && exit 1
 fi
 
 # validate shasum for downloaded artifact
-("${shasum}" "${file}" | cut -d ' ' -f 1 | grep -xq "^${digest}$") || \
-  (echo "error: shasum verification failed for dependency" && rm -f "${file}" && exit 1)
+shasum=$("${shasum_cmd[@]}" "${file}")
+(echo "$shasum" | cut -d ' ' -f 1 | grep -xq "^${digest}$") || \
+  (echo "error: shasum verification failed for dependency" && exit 1)
