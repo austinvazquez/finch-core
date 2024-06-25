@@ -71,6 +71,15 @@ esac
 # pull artifact from dependency repository
 curl -L --fail "${url}/${artifact}" > "${file}"
 
+shasum=""
+if shasum; then
+  shasum="shasum --algorithm 512"
+elif sha512sum; then
+  shasum="sha512sum"
+else
+  echo "error: shasum dependency not found" && exit 1
+fi
+
 # validate shasum for downloaded artifact
-(shasum --algorithm 512 "${file}" | cut -d ' ' -f 1 | grep -xq "^${digest}$") || \
+("${shasum}" "${file}" | cut -d ' ' -f 1 | grep -xq "^${digest}$") || \
   (echo "error: shasum verification failed for dependency" && rm -f "${file}" && exit 1)
