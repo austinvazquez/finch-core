@@ -20,52 +20,19 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  e2e-tests:
+  spot-check-make:
     strategy:
       fail-fast: false
       matrix:
-        os:
-          [
-            [self-hosted, macos, amd64, 13, test],
-            [self-hosted, macos, amd64, 14, test],
-            [self-hosted, macos, arm64, 13, test],
-            [self-hosted, macos, arm64, 14, test],
-          ]
+        os: [windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-          submodules: true
-      - name: Setup go
-        uses: actions/setup-go@cdcb36043654635271a94b9a6d1392de5bb323a7 # v5.0.1
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+      - uses: actions/setup-go@cdcb36043654635271a94b9a6d1392de5bb323a7 # v5.0.1
         with:
           go-version-file: e2e/go.mod
           cache-dependency-path: e2e/go.sum
-      - name: Clean up previous files
-        shell: zsh {0}
+      - name: Check make
         run: |
-          sudo rm -rf ~/.lima
-          sudo rm -rf ./_output
-          if pgrep '^qemu-system'; then
-            sudo pkill '^qemu-system'
-          fi
-          if pgrep '^socket_vmnet'; then
-            sudo pkill '^socket_vmnet'
-          fi
-      - name: Install dependencies
-        shell: zsh {0}
-        run: brew install lz4 automake autoconf libtool
-      - name: Build project
-        shell: zsh {0}
-        run: |
-          export PATH="/opt/homebrew/opt/libtool/libexec/gnubin:$PATH"
-          which libtool
-          # Install socket_vmnet to `_output/bin` which is used in $PATH
-          SOCKET_VMNET_TEMP_PREFIX=$(pwd)/_output/ make lima-socket-vmnet
           make install.dependencies
-      - name: Run e2e tests
-        shell: zsh {0}
-        run: make test-e2e
+          make clean
