@@ -20,6 +20,27 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  shellcheck:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-13, windows-2022]
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+
+      - name: Install shellcheck (Windows)
+        if: ${{ startsWith( matrix.os, 'windows' ) }}
+        run: choco install shellcheck
+
+      - name: Install shellcheck (macOS)
+        if: ${{ startsWith( matrix.os, 'macos' ) }}
+        run: brew install shellcheck
+
+      - name: Run shellcheck
+        run: shellcheck $(find . -type d \( -path ./src \) -prune -o -name '*.sh' -print)
+
   install-dependencies:
     # This is a spot check for make install.dependencies on macOS and Windows platforms.
     # Finch-core provides the core dependencies needed to run Finch such as the base OS
