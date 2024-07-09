@@ -13,14 +13,11 @@ jobs:
     steps:
       - name: Generate timestamp
         id: timestamp
-        run: |
-          timestamp=$(date +%s)
-          echo "Timestamp is ${timestamp}"
-          echo "::set-output name=value::$timestamp" >> $GITHUB_OUTPUT
+        run: echo "::set-output name=value::$(date +%s)" >> $GITHUB_OUTPUT
       
       - name: Check timestamp
         run: |
-          timestamp=${{ steps.timestamp.output.value }}
+          timestamp=${{ steps.timestamp.outputs.value }}
           echo "Env var is $timestamp"
   
   new:
@@ -28,10 +25,7 @@ jobs:
     steps:
       - name: Generate timestamp
         id: timestamp
-        run: |
-          timestamp=$(date +%s)
-          echo "Timestamp is ${timestamp}"
-          echo "value=${timestamp}" >> $GITHUB_OUTPUT
+        run: echo "value=$(date +%s)" >> $GITHUB_OUTPUT
 
       - name: Check timestamp
         run: |
