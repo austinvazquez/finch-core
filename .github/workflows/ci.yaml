@@ -13,7 +13,9 @@ jobs:
     steps:
       - name: Generate timestamp
         id: timestamp
-        run: echo "::set-output name=value::$(date +%s)" >> $GITHUB_OUTPUT
+        run: |
+          timestamp=$(date +%s)
+          echo "::set-output name=value::$timestamp" >> $GITHUB_OUTPUT
       
       - name: Check timestamp
         run: |
@@ -25,7 +27,9 @@ jobs:
     steps:
       - name: Generate timestamp
         id: timestamp
-        run: echo "{value}={$(date +%s)}" >> $GITHUB_OUTPUT
+        run: |
+          timestamp=$(date +%s)
+          echo "{value}={$timestamp}" >> $GITHUB_OUTPUT
 
       - name: Check timestamp
         run: |
