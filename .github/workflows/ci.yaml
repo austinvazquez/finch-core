@@ -15,6 +15,7 @@ jobs:
         id: timestamp
         run: |
           timestamp=$(date +%s)
+          echo "Timestamp is ${timestamp}"
           echo "::set-output name=value::$timestamp" >> $GITHUB_OUTPUT
       
       - name: Check timestamp
@@ -29,7 +30,8 @@ jobs:
         id: timestamp
         run: |
           timestamp=$(date +%s)
-          echo "{value}={$timestamp}" >> $GITHUB_OUTPUT
+          echo "Timestamp is ${timestamp}"
+          echo "value=${timestamp}" >> $GITHUB_OUTPUT
 
       - name: Check timestamp
         run: |
