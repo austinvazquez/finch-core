@@ -32,6 +32,7 @@ jobs:
       - uses: actions/setup-go@3041bf56c941b39c61721a86cd11f3bb1338122a # v5.2.0
         with:
           go-version: 1.22.x
+          cache: false
 
       - name: Install dependencies
         # QEMU:      required by Lima itself
@@ -91,6 +92,7 @@ jobs:
       - uses: actions/setup-go@3041bf56c941b39c61721a86cd11f3bb1338122a # v5.2.0
         with:
           go-version: 1.22.x
+          cache: false
 
       - name: Install dependencies
         # QEMU:      required by Lima itself
@@ -141,6 +143,7 @@ jobs:
       - uses: actions/setup-go@3041bf56c941b39c61721a86cd11f3bb1338122a # v5.2.0
         with:
           go-version: 1.22.x
+          cache: false
 
       - name: Create Ventura limactl tarball
         working-directory: src/lima
@@ -171,6 +174,7 @@ jobs:
       - uses: actions/setup-go@3041bf56c941b39c61721a86cd11f3bb1338122a # v5.2.0
         with:
           go-version: 1.22.x
+          cache: false
 
       - name: Create Ventura limactl tarball
         working-directory: src/lima
